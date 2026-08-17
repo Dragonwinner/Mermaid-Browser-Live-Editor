@@ -6,6 +6,7 @@
 build/**
 coverage/**
 src/**
+scripts/**
 target/**
 test/**
 webview/**

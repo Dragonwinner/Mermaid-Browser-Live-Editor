@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { exportMarkdownAsPdf } from "./markdownPdfPanel";
 import { MermaidBrowserPanel, createDiagram } from "./mermaidBrowserPanel";
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -8,7 +9,10 @@ export function activate(context: vscode.ExtensionContext): void {
       MermaidBrowserPanel.open(context, vscode.window.activeTextEditor?.document.uri)
     ),
     vscode.commands.registerCommand("mermaidBrowser.createDiagram", () => createDiagram()),
-    vscode.commands.registerCommand("mermaidBrowser.refresh", () => MermaidBrowserPanel.refreshCurrent())
+    vscode.commands.registerCommand("mermaidBrowser.refresh", () => MermaidBrowserPanel.refreshCurrent()),
+    vscode.commands.registerCommand("mermaidBrowser.exportMarkdownPdf", () =>
+      exportMarkdownAsPdf(context)
+    )
   );
 }
 

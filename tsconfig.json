@@ -4,11 +4,17 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "outDir": "out",
     "rootDir": "src",
     "strict": true,
     "skipLibCheck": true,
     "sourceMap": true
   },
-  "include": ["src/extension.ts", "src/mermaidBrowserPanel.ts", "src/mermaidRuntime.ts"]
+  "include": [
+    "src/extension.ts",
+    "src/markdownPdfPanel.ts",
+    "src/mermaidBrowserPanel.ts",
+    "src/mermaidRuntime.ts"
+  ]
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Added persistent horizontal and vertical scrollbars for oversized diagram previews.
+- Added Markdown-to-PDF export with headings, tables, code blocks, local images, and rendered Mermaid fences.
+- Added balanced A4 pagination to avoid tiny trailing pages.
+
 ## 0.1.0
 
 - Rebuilt the extension around a new Mermaid Browser identity and command namespace.

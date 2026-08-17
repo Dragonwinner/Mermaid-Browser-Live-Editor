@@ -9,5 +9,6 @@ ignoredBuiltDependencies:
   - keytar
 allowBuilds:
   '@vscode/vsce-sign': false
+  core-js: false
   esbuild: true
   keytar: false
