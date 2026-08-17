@@ -1,5 +1,0 @@
-{
-  "npm.packageManager": "pnpm",
-  "typescript.preferences.useAliasesForRenames": false,
-  "typescript.preferences.includePackageJsonAutoImports": "auto"
-} 

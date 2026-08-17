@@ -1,13 +1,18 @@
+.git/**
+.gitignore
+.github/**
 .vscode/**
 .vscode-test/**
+build/**
+coverage/**
 src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/.eslintrc.json
+target/**
+test/**
+webview/**
+images/**
 **/*.map
 **/*.ts
-!images/**  # ✅ Allow all images
-.npmrc
-webview/.npmrc
+*.vsix
+pnpm-lock.yaml
+pnpm-workspace.yaml
+tsconfig.json

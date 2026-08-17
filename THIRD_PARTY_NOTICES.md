@@ -1,7 +1,8 @@
 # Third-Party Notices
 
-This extension includes source code originally made available under the MIT
-License by Mermaid Chart.
+This repository began from software released under the MIT License by Mermaid
+Chart. Its required copyright and permission notice is retained in `LICENSE`.
 
-The MIT license notice is preserved in `LICENSE` and must remain included with
-copies or substantial portions of the software.
+Mermaid Browser also uses the public `mermaid` npm package, which is distributed
+under the MIT License. Dependency license files are included when the extension
+is packaged.

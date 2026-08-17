@@ -1,40 +1,36 @@
-# Mermaid Diagram Tools
+# Mermaid Browser
 
-Mermaid Diagram Tools is a VS Code extension for creating, previewing, editing,
-and improving Mermaid diagrams from inside the editor.
-
-This project has been reset as a fresh local extension project. It is based on
-MIT-licensed source code and keeps the original MIT license notice in
-`LICENSE`, as required by that license.
+Mermaid Browser is a local-first VS Code extension for finding, previewing, and
+managing Mermaid diagrams across a workspace.
 
 ## Features
 
-- Preview `.mmd` and `.mermaid` files in VS Code.
-- Syntax highlighting for Mermaid diagram types.
-- Commands for creating, viewing, repairing, and improving Mermaid diagrams.
-- Optional cloud and AI workflows where supported by the retained integration
-  code and user configuration.
+- Index `.mmd` and `.mermaid` files plus Mermaid code fences in Markdown.
+- Search by diagram title, source path, or diagram type.
+- Filter the workspace index by diagram type.
+- Switch between a live Mermaid preview and source view.
+- Open the exact source line for diagrams embedded in Markdown.
+- Copy diagram source or its workspace-relative path.
+- Export the rendered diagram as SVG.
+- Create a new Mermaid diagram from the command palette.
+- Configure the scan limit, Markdown indexing, and preview theme.
+
+Run **Mermaid Browser: Open Workspace Browser** from the command palette to
+open the main workspace view. The editor title action previews the active
+`.mmd` or `.mermaid` file directly in the browser.
 
 ## Development
 
-Install dependencies:
-
 ```sh
 pnpm install
+pnpm run compile
+pnpm run package
 ```
 
-Compile the extension:
-
-```sh
-pnpm compile
-```
-
-Package the extension:
-
-```sh
-pnpm package
-```
+The extension bundles the public `mermaid` npm package at build time and does
+not require a cloud account or private package registry.
 
 ## License
 
-This project includes code made available under the MIT License. See `LICENSE`.
+This project is distributed under the MIT License. The required notice for the
+MIT-licensed source from which the repository began is retained in `LICENSE`.
