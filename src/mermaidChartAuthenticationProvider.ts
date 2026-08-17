@@ -1,0 +1,278 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import {
+  AuthenticationProvider,
+  AuthenticationProviderAuthenticationSessionsChangeEvent,
+  AuthenticationProviderSessionOptions,
+  AuthenticationSession,
+  Disposable,
+  env,
+  EventEmitter,
+  ExtensionContext,
+  ProgressLocation,
+  Uri,
+  UriHandler,
+  window,
+} from "vscode";
+import { v4 as uuid } from "uuid";
+import { PromiseAdapter, promiseFromEvent } from "./util";
+import { MermaidChartVSCode } from "./mermaidChartVSCode";
+import analytics from "./analytics";
+import { consumePendingLoginTrigger, getPendingLoginTrigger } from "./loginTrigger";
+
+const utmSource = 'mermaid_chart_vs_code';
+
+class UriEventHandler extends EventEmitter<Uri> implements UriHandler {
+  public handleUri(uri: Uri) {
+    this.fire(uri);
+  }
+}
+
+export class MermaidChartAuthenticationProvider
+  implements AuthenticationProvider, Disposable
+{
+  static id = "mermaidchart";
+  static providerName = "MermaidChart";
+  private sessionsKey = `${MermaidChartAuthenticationProvider.id}.sessions`;
+  private _sessionChangeEmitter =
+    new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
+  private _disposable: Disposable;
+  private _codeExchangePromises = new Map<
+    string,
+    { promise: Promise<string>; cancel: EventEmitter<void> }
+  >();
+  private _uriHandler = new UriEventHandler();
+  private _manualToken: string | null = null; // For manual token storage
+
+  private static instance: MermaidChartAuthenticationProvider | null = null;
+
+  static getInstance(
+    mcAPI: MermaidChartVSCode,
+    context: ExtensionContext
+  ): MermaidChartAuthenticationProvider {
+    if (!MermaidChartAuthenticationProvider.instance) {
+      MermaidChartAuthenticationProvider.instance = new MermaidChartAuthenticationProvider(
+        mcAPI,
+        context
+      );
+    }
+    return MermaidChartAuthenticationProvider.instance;
+  }
+
+  constructor(
+    private readonly mcAPI: MermaidChartVSCode,
+    private readonly context: ExtensionContext
+  ) {
+    this._disposable = Disposable.from(
+      window.registerUriHandler(this._uriHandler)
+    );
+    this.mcAPI.setRedirectURI(this.redirectUri);
+  }
+
+  get onDidChangeSessions() {
+    return this._sessionChangeEmitter.event;
+  }
+
+  get redirectUri() {
+    const publisher = this.context.extension.packageJSON.publisher;
+    const name = this.context.extension.packageJSON.name;
+    return `${env.uriScheme}://${publisher}.${name}`;
+  }
+
+  /**
+   * Get the existing sessions
+   * @param scopes
+   * @returns
+   */
+  public async getSessions(
+    scopes: readonly string[] | undefined,
+    options: AuthenticationProviderSessionOptions
+  ): Promise<AuthenticationSession[]> {
+    const allSessions = await this.context.secrets.get(this.sessionsKey);
+
+    if (allSessions) {
+      return JSON.parse(allSessions) as AuthenticationSession[];
+    }
+
+    return [];
+  }
+
+  /**
+   * Create a new auth session
+   * @param scopes
+   * @returns
+   */
+  public async createSession(scopes: string[]): Promise<AuthenticationSession> {
+    try {
+      let token: string;
+      let user: any;
+      
+      // Check if we have a manual token to use
+      if (this._manualToken) {
+        token = this._manualToken;
+        this._manualToken = null; // Clear after use
+        
+        // Set token and validate by getting user info
+        this.mcAPI.setAccessToken(token);
+        user = await this.getUserInfo();
+        
+        if (!user || !user.emailAddress) {
+          throw new Error('Invalid manual token - unable to fetch user information');
+        }
+      } else {
+        // Regular OAuth flow
+        await this.login(scopes);
+        token = await this.mcAPI.getAccessToken();
+        if (!token) {
+          throw new Error(`MermaidChart login failure`);
+        }
+        user = await this.getUserInfo();
+      }
+      const session: AuthenticationSession = {
+        id: uuid(),
+        accessToken: token,
+        account: {
+          label: user.fullName ? user.fullName:user.emailAddress,
+          id: user.emailAddress,
+        },
+        scopes: [],
+      };
+
+      await this.context.secrets.store(
+        this.sessionsKey,
+        JSON.stringify([session])
+      );
+
+      this._sessionChangeEmitter.fire({
+        added: [session],
+        removed: [],
+        changed: [],
+      });
+
+      window.showInformationMessage(`Signed in with ${session.account.id}`);
+      const trigger = consumePendingLoginTrigger();
+      analytics.trackSignInCompleted(trigger);
+      analytics.trackLogin();
+      return session;
+    } catch (e) {
+      window.showErrorMessage(`Sign in failed: ${e}`);
+      analytics.trackException(e);
+      throw e;
+    }
+  }
+
+  /**
+   * Remove an existing session
+   * @param sessionId
+   */
+  public async removeSession(sessionId: string): Promise<void> {
+    analytics.trackLogout();
+    const allSessions = await this.context.secrets.get(this.sessionsKey);
+    if (allSessions) {
+      let sessions = JSON.parse(allSessions) as AuthenticationSession[];
+      const sessionIdx = sessions.findIndex((s) => s.id === sessionId);
+      const session = sessions[sessionIdx];
+      sessions.splice(sessionIdx, 1);
+      this.mcAPI.resetAccessToken();
+      await this.context.secrets.store(
+        this.sessionsKey,
+        JSON.stringify(sessions)
+      );
+
+      if (session) {
+        this._sessionChangeEmitter.fire({
+          added: [],
+          removed: [session],
+          changed: [],
+        });
+      }
+    }
+  }
+
+  /**
+   * Dispose the registered services
+   */
+  public async dispose() {
+    this._disposable.dispose();
+  }
+
+  /**
+   * Log in to MermaidChart
+   */
+  private async login(scopes: string[] = []) {
+    return await window.withProgress<string>(
+      {
+        location: ProgressLocation.Notification,
+        title: "Signing in to MermaidChart...",
+        cancellable: true,
+      },
+      async (_, token) => {
+        const loginTrigger = getPendingLoginTrigger();
+        const authData = await this.mcAPI.getAuthorizationData({
+          scope: scopes,
+          trackingParams: {
+            utm_source: utmSource,
+            utm_medium: env.uriScheme,
+            utm_campaign: loginTrigger,
+            // utm_campaign carries the login trigger (mermaid-sidebar, preview-repair, pre-commit, etc.) for collab
+            // SIGN_UP attribution — not a marketing campaign name.
+          },
+        });
+        const uri = Uri.parse(authData.url);
+        await env.openExternal(uri);
+
+        const scope = authData.scope.join(" ");
+        let codeExchangePromise = this._codeExchangePromises.get(scope);
+        if (!codeExchangePromise) {
+          codeExchangePromise = promiseFromEvent(
+            this._uriHandler.event,
+            this.handleUri(scopes)
+          );
+          this._codeExchangePromises.set(scope, codeExchangePromise);
+        }
+
+        try {
+          return await Promise.race([
+            codeExchangePromise.promise,
+            new Promise<string>((_, reject) =>
+              setTimeout(() => reject("Cancelled"), 60000)
+            ),
+            promiseFromEvent<any, any>(
+              token.onCancellationRequested,
+              (_, __, reject) => {
+                reject("User Cancelled");
+              }
+            ).promise,
+          ]);
+        } finally {
+          codeExchangePromise?.cancel.fire();
+          this._codeExchangePromises.delete(scope);
+        }
+      }
+    );
+  }
+
+  /**
+   * Handle the redirect to VS Code (after sign in from Auth0)
+   * @param scopes
+   * @returns
+   */
+  private handleUri: (
+    scopes: readonly string[]
+  ) => PromiseAdapter<Uri, string> =
+    (scopes) => async (uri, resolve, reject) => {
+      await this.mcAPI.handleAuthorizationResponse(`?${uri.query}`);
+      resolve("done");
+    };
+
+  private async getUserInfo() {
+    return await this.mcAPI.getUser();
+  }
+
+  /**
+   * Set manual token for next createSession call
+   * This allows manual token to go through the same VS Code session management flow
+   */
+  public setManualToken(token: string): void {
+    this._manualToken = token;
+  }
+}

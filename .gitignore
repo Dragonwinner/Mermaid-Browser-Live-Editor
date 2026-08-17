@@ -1,0 +1,11 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+.DS_Store
+.npmrc
+webview/.npmrc
+dist-preview
+dist-sidebar
+.github
