@@ -1,8 +1,8 @@
 {
-  "name": "mermaid-browser",
-  "publisher": "studywithgod",
+  "name": "mermaid-browser-live-editor",
+  "publisher": "codewithgod",
   "displayName": "Mermaid Browser & Live Editor",
-  "description": "Local-first Mermaid diagram workspace explorer, real-time live editor, native markdown preview toolbar, and high-fidelity Markdown-to-PDF exporter with KaTeX LaTeX math support.",
+  "description": "Browse, search, live edit, and export Mermaid diagrams across your workspace with PDF math support.",
   "version": "0.3.6",
   "license": "MIT",
   "repository": {
@@ -23,31 +23,14 @@
   },
   "categories": [
     "Visualization",
-    "Programming Languages",
-    "Other",
-    "Formatters"
+    "Other"
   ],
   "keywords": [
     "mermaid",
-    "mermaid-js",
     "diagram",
-    "flowchart",
-    "sequence-diagram",
-    "architecture",
     "markdown",
-    "markdown-preview",
-    "pdf-export",
-    "katex",
-    "math",
-    "latex",
-    "live-editor",
-    "uml",
-    "chart",
-    "visualizer",
-    "graphviz",
-    "erd",
-    "gantt",
-    "mindmap"
+    "flowchart",
+    "pdf"
   ],
   "activationEvents": [
     "onCommand:mermaidBrowser.open",
