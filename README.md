@@ -187,32 +187,33 @@ Customize Mermaid Browser behavior via VS Code Settings (`Ctrl+,` or `Cmd+,` &ra
 
 ## 🛠️ Build & Contribution
 
-Contributions and feature suggestions are always welcome!
+Contributions, bug reports, and feature suggestions are warmly welcomed!
 
-### Prerequisites
-- Node.js `v18.0.0` or higher
-- `pnpm` or `npm`
+> 📖 **Read our complete [Contributing Guide (`CONTRIBUTING.md`)](./CONTRIBUTING.md)** for detailed project architecture, webview debugging workflows, coding standards, and PR submission checklists.
 
-### Local Development Setup
+### Quick Start for Developers
+
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/Dragonwinner/Mermaid-Browser-Live-Editor.git
 cd Mermaid-Browser-Live-Editor
 
-# Install dependencies
+# 2. Install dependencies
 pnpm install
 
-# Compile TypeScript and bundle webview assets
+# 3. Typecheck & Compile TypeScript bundles (esbuild)
+pnpm run check
 pnpm run compile
 
-# Package as a .vsix extension
+# 4. Package as a local .vsix extension
 pnpm run package
 ```
 
-### Running Extension in Debug Mode
-1. Open the project root in VS Code / Antigravity IDE.
-2. Press `F5` to launch an **Extension Development Host** window.
-3. Test commands, preview markdown files, or export PDFs in real time!
+### Running in Debug Mode
+1. Open the project folder in VS Code or Antigravity IDE.
+2. Press <kbd>F5</kbd> to launch an **Extension Development Host** instance.
+3. Test diagram browsing, live editing, and PDF exporting in real time.
+4. For details on how to debug webview message passing and developer tools, see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ---
 
