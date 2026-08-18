@@ -1,15 +1,54 @@
 {
   "name": "mermaid-browser",
   "publisher": "studywithgod",
-  "displayName": "Mermaid Browser",
-  "description": "Browse, search, preview, create, and export Mermaid diagrams across a VS Code workspace.",
-  "version": "0.2.0",
+  "displayName": "Mermaid Browser & Live Editor",
+  "description": "Local-first Mermaid diagram workspace explorer, real-time live editor, native markdown preview toolbar, and high-fidelity Markdown-to-PDF exporter with KaTeX LaTeX math support.",
+  "version": "0.3.5",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dragonwinner/Mermaid-Browser-Live-Editor.git"
+  },
+  "homepage": "https://github.com/Dragonwinner/Mermaid-Browser-Live-Editor#readme",
+  "bugs": {
+    "url": "https://github.com/Dragonwinner/Mermaid-Browser-Live-Editor/issues"
+  },
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#2e3039",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Visualization", "Other"],
-  "keywords": ["mermaid", "diagram", "browser", "flowchart", "sequence diagram", "workspace"],
+  "categories": [
+    "Visualization",
+    "Programming Languages",
+    "Other",
+    "Formatters"
+  ],
+  "keywords": [
+    "mermaid",
+    "mermaid-js",
+    "diagram",
+    "flowchart",
+    "sequence-diagram",
+    "architecture",
+    "markdown",
+    "markdown-preview",
+    "pdf-export",
+    "katex",
+    "math",
+    "latex",
+    "live-editor",
+    "uml",
+    "chart",
+    "visualizer",
+    "graphviz",
+    "erd",
+    "gantt",
+    "mindmap"
+  ],
   "activationEvents": [
     "onCommand:mermaidBrowser.open",
     "onCommand:mermaidBrowser.createDiagram",
@@ -24,8 +63,14 @@
     "languages": [
       {
         "id": "mermaid",
-        "aliases": ["Mermaid", "mermaid"],
-        "extensions": [".mmd", ".mermaid"],
+        "aliases": [
+          "Mermaid",
+          "mermaid"
+        ],
+        "extensions": [
+          ".mmd",
+          ".mermaid"
+        ],
         "configuration": "./language-configuration.json",
         "icon": {
           "light": "./assets/mermaid-browser-file.svg",
@@ -70,6 +115,30 @@
         "title": "Export Markdown as PDF",
         "category": "Mermaid Browser",
         "icon": "$(file-pdf)"
+      },
+      {
+        "command": "mermaidBrowser.previewInline",
+        "title": "Preview This Diagram",
+        "category": "Mermaid Browser",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "mermaidBrowser.editLive",
+        "title": "Edit Live",
+        "category": "Mermaid Browser",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "mermaidBrowser.copyInline",
+        "title": "Copy Diagram Source",
+        "category": "Mermaid Browser",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "mermaidBrowser.exportSvgInline",
+        "title": "Export Diagram as SVG",
+        "category": "Mermaid Browser",
+        "icon": "$(export)"
       }
     ],
     "menus": {
@@ -77,6 +146,11 @@
         {
           "command": "mermaidBrowser.previewDiagram",
           "when": "resourceExtname =~ /^\\.(mmd|mermaid)$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mermaidBrowser.open",
+          "when": "resourceExtname =~ /^\\.(md|markdown)$/",
           "group": "navigation@1"
         },
         {
@@ -89,12 +163,29 @@
         {
           "command": "mermaidBrowser.open",
           "when": "resourceExtname =~ /^\\.(mmd|mermaid|md|markdown)$/",
-          "group": "navigation@1"
+          "group": "mermaid@1"
         },
         {
           "command": "mermaidBrowser.exportMarkdownPdf",
           "when": "resourceExtname =~ /^\\.(md|markdown)$/",
-          "group": "navigation@2"
+          "group": "mermaid@2"
+        },
+        {
+          "command": "mermaidBrowser.editLive",
+          "when": "resourceExtname =~ /^\\.(md|markdown)$/",
+          "group": "mermaid@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "mermaidBrowser.exportMarkdownPdf",
+          "when": "resourceExtname =~ /^\\.(md|markdown)$/",
+          "group": "mermaid@1"
+        },
+        {
+          "command": "mermaidBrowser.open",
+          "when": "resourceExtname =~ /^\\.(mmd|mermaid|md|markdown)$/",
+          "group": "mermaid@2"
         }
       ]
     },
@@ -116,18 +207,27 @@
         "mermaidBrowser.previewTheme": {
           "type": "string",
           "default": "default",
-          "enum": ["default", "neutral", "dark", "forest", "base"],
+          "enum": [
+            "default",
+            "neutral",
+            "dark",
+            "forest",
+            "base"
+          ],
           "description": "Mermaid theme used in workspace browser previews."
         }
       }
-    }
+    },
+    "markdown.previewScripts": [
+      "./dist/markdownPreviewMermaid.js"
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "node scripts/copyThirdPartyLicenses.mjs && tsc -p . --noEmit && esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18 && esbuild src/mermaidRuntime.ts --bundle --outfile=dist/mermaidRuntime.js --format=esm --platform=browser --target=es2022 --minify",
+    "compile": "node scripts/copyThirdPartyLicenses.mjs && tsc -p . --noEmit && esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18 && esbuild src/mermaidRuntime.ts --bundle --outfile=dist/mermaidRuntime.js --format=esm --platform=browser --target=es2022 --minify && esbuild src/markdownPreviewMermaid.ts --bundle --outfile=dist/markdownPreviewMermaid.js --format=iife --platform=browser --target=es2022 --minify",
     "watch": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18 --watch",
     "check": "tsc -p . --noEmit",
-    "package": "vsce package --no-dependencies --allow-missing-repository"
+    "package": "vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
@@ -137,6 +237,7 @@
     "esbuild": "^0.25.0",
     "html2canvas": "1.4.1",
     "jspdf": "4.2.1",
+    "katex": "0.18.4",
     "marked": "16.4.2",
     "mermaid": "11.16.1",
     "typescript": "^5.7.0"

@@ -5,6 +5,7 @@ const licenses = [
   ["mermaid", "LICENSE", "mermaid-MIT.txt"],
   ["jspdf", "LICENSE", "jspdf-MIT.txt"],
   ["html2canvas", "LICENSE", "html2canvas-MIT.txt"],
+  ["katex", "LICENSE", "katex-MIT.txt"],
   ["marked", "LICENSE.md", "marked-MIT.md"],
   ["dompurify", "LICENSE", "dompurify-Apache-2.0.txt"],
 ];

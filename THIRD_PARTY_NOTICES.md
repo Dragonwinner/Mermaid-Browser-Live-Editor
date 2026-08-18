@@ -8,6 +8,7 @@ Mermaid Browser bundles the following public packages:
 - Mermaid, MIT License, Copyright (c) 2014-2022 Knut Sveidqvist.
 - jsPDF, MIT License, Copyright (c) 2010-2025 James Hall and Copyright (c) 2015-2025 yWorks GmbH.
 - html2canvas, MIT License, Copyright (c) 2012 Niklas von Hertzen.
+- KaTeX, MIT License, Copyright (c) 2013-2020 Khan Academy and other contributors.
 - Marked, MIT License, Copyright (c) 2018+ MarkedJS and Copyright (c) 2011-2018 Christopher Jeffrey.
 - DOMPurify, Apache License 2.0 or Mozilla Public License 2.0, authored by Cure53.
 
