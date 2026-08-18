@@ -10,6 +10,7 @@ scripts/**
 target/**
 test/**
 webview/**
+images/**
 **/*.map
 **/*.ts
 *.vsix

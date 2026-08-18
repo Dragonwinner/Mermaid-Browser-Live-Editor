@@ -3,7 +3,7 @@
   "publisher": "studywithgod",
   "displayName": "Mermaid Browser & Live Editor",
   "description": "Local-first Mermaid diagram workspace explorer, real-time live editor, native markdown preview toolbar, and high-fidelity Markdown-to-PDF exporter with KaTeX LaTeX math support.",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "license": "MIT",
   "repository": {
     "type": "git",

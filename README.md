@@ -1,6 +1,6 @@
 <div align="center">
 
-![Mermaid Browser Logo](assets/logo.png)
+![Mermaid Browser Logo](https://raw.githubusercontent.com/Dragonwinner/Mermaid-Browser-Live-Editor/main/assets/logo.png)
 
 # Mermaid Browser & Live Editor
 
@@ -54,7 +54,7 @@
 - **Side-by-Side Inspector:** Split view featuring high-res SVG canvas on one side and editable source with line diagnostics on the other.
 - **Theme Switcher:** Switch between `default`, `dark`, `neutral`, `forest`, and `base` themes on the fly.
 
-![Workspace Diagram Browser and Search](images/browser.gif)
+![Workspace Diagram Browser and Search](https://raw.githubusercontent.com/Dragonwinner/Mermaid-Browser-Live-Editor/main/images/browser.gif)
 
 *Figure 1: Instant workspace-wide diagram catalog, search filtering, and live SVG inspector.*
 
@@ -66,7 +66,7 @@ When previewing any Markdown file in VS Code's native Markdown Preview (`Ctrl+Sh
 - **High-DPI Readability:** Automatic `viewBox` inspection forces crisp typography and high legibility even for giant system flowcharts.
 - **Direct Actions:** One-click `✏️ Edit Live`, `📋 Copy Source`, and `💾 Export SVG` directly from the preview!
 
-![In-Markdown Floating Zoom and Pan Toolbar](images/zoom-in-zoom-out.gif)
+![In-Markdown Floating Zoom and Pan Toolbar](https://raw.githubusercontent.com/Dragonwinner/Mermaid-Browser-Live-Editor/main/images/zoom-in-zoom-out.gif)
 
 *Figure 2: Native Markdown preview floating toolbar with real-time zoom, pan, and live edit controls.*
 
@@ -94,7 +94,7 @@ Convert comprehensive Markdown documents into stunning, print-ready PDF reports:
   2. **Editor Context:** Right-click inside an active Markdown editor &rarr; `Mermaid Browser: Export Markdown as PDF`.
   3. **Editor Navigation Bar:** Click the `$(file-pdf)` icon at the top right of your markdown editor.
 
-![Markdown to PDF Export with Rendered Diagrams](images/pdf-export.gif)
+![Markdown to PDF Export with Rendered Diagrams](https://raw.githubusercontent.com/Dragonwinner/Mermaid-Browser-Live-Editor/main/images/pdf-export.gif)
 
 *Figure 3: Seamless Markdown-to-PDF export pipeline with KaTeX LaTeX math and rendered Mermaid diagrams.*
 
