@@ -207,7 +207,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "node scripts/copyThirdPartyLicenses.mjs && tsc -p . --noEmit && esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18 && esbuild src/mermaidRuntime.ts --bundle --outfile=dist/mermaidRuntime.js --format=esm --platform=browser --target=es2022 --minify && esbuild src/markdownPreviewMermaid.ts --bundle --outfile=dist/markdownPreviewMermaid.js --format=iife --platform=browser --target=es2022 --minify",
+    "compile": "node scripts/copyThirdPartyLicenses.mjs && tsc -p . --noEmit && esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18 && esbuild src/mermaidRuntime.ts --bundle --outfile=dist/mermaidRuntime.js --format=esm --platform=browser --target=es2022 --loader:.css=text --minify && esbuild src/markdownPreviewMermaid.ts --bundle --outfile=dist/markdownPreviewMermaid.js --format=iife --platform=browser --target=es2022 --minify",
     "watch": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=node18 --watch",
     "check": "tsc -p . --noEmit",
     "package": "vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links"

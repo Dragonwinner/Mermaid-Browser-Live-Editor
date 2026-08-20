@@ -169,14 +169,15 @@ function markdownPdfHtml(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style nonce="${nonce}">
     *{box-sizing:border-box}body{margin:0;padding:24px;color:#1f2937;background:#d1d5db;color-scheme:light;font-family:Arial,Helvetica,sans-serif}.status{position:sticky;top:0;z-index:2;margin:0 auto 16px;width:760px;padding:10px 14px;color:var(--vscode-notifications-foreground,#fff);background:var(--vscode-notifications-background,#252526);border:1px solid var(--vscode-notifications-border,#454545);font:13px var(--vscode-font-family,Arial)}article{width:760px;margin:0 auto;padding:54px 58px;overflow:hidden;color:#111827;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:15px;line-height:1.6}h1,h2,h3,h4{margin:1.25em 0 .55em;line-height:1.25;letter-spacing:0;color:#111827}h1{margin-top:0;font-size:30px;border-bottom:2px solid #0f766e;padding-bottom:10px}h2{font-size:23px;border-bottom:1px solid #d1d5db;padding-bottom:5px}h3{font-size:19px}p{margin:.65em 0}a{color:#0f766e;text-decoration:underline}blockquote{margin:1em 0;padding:.35em 1em;color:#374151;border-left:4px solid #0f766e;background:#f0fdfa}pre{margin:1em 0;padding:13px;overflow:hidden;border:1px solid #d1d5db;background:#f8fafc;font:12px/1.5 Consolas,monospace;white-space:pre-wrap;word-break:break-word}code{font-family:Consolas,monospace;background:#f3f4f6;padding:1px 4px}pre code{background:transparent;padding:0}table{width:100%;margin:1em 0;border-collapse:collapse;font-size:13px}th,td{padding:7px 9px;border:1px solid #cbd5e1;text-align:left;vertical-align:top}th{background:#f1f5f9}img{display:block;max-width:100%;height:auto;margin:1em auto}.mermaid-pdf-diagram{margin:18px 0;padding:12px;overflow:hidden;border:1px solid #d1d5db;background:#fff;text-align:center}.mermaid-pdf-diagram img{display:block;margin:0 auto;max-width:100%;height:auto;background:#fff}hr{margin:1.5em 0;border:0;border-top:1px solid #cbd5e1}ul,ol{padding-left:24px}article>*{break-inside:avoid}
-    .math-display{display:block;text-align:center;margin:1em 0;font-size:1.1em;overflow-x:auto}.math-inline{display:inline}
+    .math-display{display:block;text-align:center;margin:1.4em auto;font-size:1.15em;line-height:1.4;overflow-x:visible}.math-inline{display:inline-block;vertical-align:middle;font-size:1.05em;margin:0 2px}
+    .katex{font-family:KaTeX_Main,"Times New Roman",Times,"Cambria Math","STIX Two Math",serif!important;font-size:1.1em;line-height:1.2}.katex-display{margin:0.5em 0!important;text-align:center}.katex-display>.katex{display:inline-block;white-space:normal;text-align:center}
   </style>
 </head>
 <body>
   <div class="status" id="status">Preparing Markdown and Mermaid diagrams...</div>
   <article id="document"></article>
   <script type="module" nonce="${nonce}">
-    import mermaid, { DOMPurify, html2canvas, jsPDF, katex, marked } from "${runtimeUri}";
+    import mermaid, { DOMPurify, html2canvas, jsPDF, katex, katexCss, marked } from "${runtimeUri}";
     const vscode = acquireVsCodeApi();
     const payload = ${data};
     const article = document.getElementById('document');
@@ -184,49 +185,69 @@ function markdownPdfHtml(
     const update = msg => { status.textContent = msg; vscode.postMessage({type:'progress',message:msg}); };
 
     try {
-      update('Processing math formulas...');
+      if (katexCss) {
+        const styleEl = document.createElement('style');
+        styleEl.textContent = katexCss;
+        document.head.appendChild(styleEl);
+      }
+
+      update('Processing math formulas (KaTeX)...');
       await tick();
 
-      // --- Math Pre-processing (skip code blocks) ---
       let md = payload.markdown;
-      // Protect fenced code blocks and inline code from math replacement
       const codeHolders = [];
-      // Fenced blocks first
-      md = md.replace(/(\x60\x60\x60[\\s\\S]*?\x60\x60\x60)/g, (m) => {
+      md = md.replace(/^(\`{3,}|~{3,})[^\r\n]*\r?\n([\s\S]*?)^\\\\1\s*$/gm, (m) => {
         codeHolders.push(m);
-        return '\\x00CODE' + (codeHolders.length - 1) + '\\x00';
+        return '@@@CODE_BLOCK_' + (codeHolders.length - 1) + '@@@';
       });
-      // Inline code
-      md = md.replace(/(\x60[^\x60\\n]+\x60)/g, (m) => {
+      md = md.replace(/(\`[^\`\n]+\`)/g, (m) => {
         codeHolders.push(m);
-        return '\\x00CODE' + (codeHolders.length - 1) + '\\x00';
+        return '@@@CODE_BLOCK_' + (codeHolders.length - 1) + '@@@';
       });
+
       const mathHolders = [];
-      // Display math $$...$$
-      md = md.replace(/\\$\\$([\\s\\S]+?)\\$\\$/g, (_, tex) => {
+      md = md.replace(/\\$\\$([\s\S]+?)\\$\\$/g, (_, tex) => {
         try {
-          const index = mathHolders.push('<div class="math-display">' + katex.renderToString(tex.trim(), {displayMode:true, output:'mathml', throwOnError:false}) + '</div>') - 1;
+          const rendered = katex.renderToString(tex.trim(), {displayMode:true, output:'html', throwOnError:false});
+          const index = mathHolders.push('<div class="math-display">' + rendered + '</div>') - 1;
+          return '\\n<div data-pdf-math="' + index + '"></div>\\n';
+        } catch(e) {
+          const index = mathHolders.push('<pre class="math-error"><code>' + esc(tex) + '</code></pre>') - 1;
           return '\\n<div data-pdf-math="' + index + '"></div>\\n';
         }
-        catch(e) { return '$$' + tex + '$$'; }
       });
-      // Inline math $...$
-      md = md.replace(/(?<!\\$)\\$(?!\\$)([^\\n$]+?)\\$(?!\\$)/g, (_, tex) => {
+      md = md.replace(/(?<!\\\\)\\$([^\n$]+?)(?<!\\\\)\\$/g, (_, tex) => {
         try {
-          const index = mathHolders.push('<span class="math-inline">' + katex.renderToString(tex.trim(), {displayMode:false, output:'mathml', throwOnError:false}) + '</span>') - 1;
+          const rendered = katex.renderToString(tex.trim(), {displayMode:false, output:'html', throwOnError:false});
+          const index = mathHolders.push('<span class="math-inline">' + rendered + '</span>') - 1;
+          return '<span data-pdf-math="' + index + '"></span>';
+        } catch(e) {
+          const index = mathHolders.push('<span>$' + esc(tex) + '$</span>') - 1;
           return '<span data-pdf-math="' + index + '"></span>';
         }
-        catch(e) { return '$' + tex + '$'; }
       });
-      // Restore code blocks
-      md = md.replace(/\\x00CODE(\\d+)\\x00/g, (_, idx) => codeHolders[Number(idx)] || '');
+      md = md.replace(/@@@CODE_BLOCK_(\d+)@@@/g, (_, idx) => codeHolders[Number(idx)] || '');
 
       update('Parsing markdown...');
       await tick();
       const markedHtml = await marked.parse(md, {gfm:true, breaks:false});
-      const parsed = markedHtml.replace(/<(div|span) data-pdf-math="(\\d+)"><\\/\\1>/g, (_, _tag, idx) => mathHolders[Number(idx)] || '');
-      const mathTags = ['math','semantics','mrow','mi','mo','mn','msub','msup','mfrac','msqrt','mroot','mtext','mspace','mover','munder','munderover','mtable','mtr','mtd','maligngroup','malignmark','mphantom','mpadded','merror','mstyle','menclose','mmultiscripts','mprescripts','annotation'];
-      article.innerHTML = DOMPurify.sanitize(parsed, {ADD_ATTR:['data-mermaid-index'], ADD_TAGS:mathTags, ALLOW_UNKNOWN_PROTOCOLS:true});
+      article.innerHTML = DOMPurify.sanitize(markedHtml, {
+        ADD_ATTR: ['data-mermaid-index', 'data-pdf-math', 'style', 'class', 'aria-hidden', 'viewBox', 'width', 'height', 'd', 'fill', 'stroke', 'xmlns'],
+        ADD_TAGS: ['svg', 'path', 'g', 'rect', 'line', 'polygon', 'text', 'defs', 'clipPath', 'use', 'math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msub', 'msup', 'mfrac', 'msqrt', 'mroot', 'mtext', 'mspace', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd'],
+        ALLOW_UNKNOWN_PROTOCOLS: true
+      });
+
+      const mathElements = article.querySelectorAll('[data-pdf-math]');
+      mathElements.forEach(el => {
+        const idx = Number(el.dataset.pdfMath);
+        if (!isNaN(idx) && mathHolders[idx] !== undefined) {
+          const temp = document.createElement('div');
+          temp.innerHTML = mathHolders[idx];
+          if (temp.firstElementChild) {
+            el.replaceWith(temp.firstElementChild);
+          }
+        }
+      });
 
       // --- Mermaid Diagrams ---
       mermaid.initialize({

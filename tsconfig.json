@@ -12,12 +12,6 @@
     "sourceMap": true
   },
   "include": [
-    "src/extension.ts",
-    "src/liveEditPanel.ts",
-    "src/markdownPdfPanel.ts",
-    "src/markdownPreviewMermaid.ts",
-    "src/mermaidBrowserPanel.ts",
-    "src/mermaidCodeLens.ts",
-    "src/mermaidRuntime.ts"
+    "src/**/*"
   ]
 }
