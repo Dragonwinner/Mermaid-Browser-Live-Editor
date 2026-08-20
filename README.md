@@ -225,6 +225,6 @@ Third-party licenses and notices are documented in [`THIRD_PARTY_NOTICES.md`](./
 ---
 
 <div align="center">
-  <b>Crafted with ❤️ by StudyWithGod</b><br/>
+  <b>Crafted with ❤️ by codewithgod</b><br/>
   <i>Empowering developers, architects, and researchers with next-generation diagramming tools.</i>
 </div>

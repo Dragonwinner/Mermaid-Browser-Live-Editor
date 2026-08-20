@@ -54,11 +54,7 @@
           ".mmd",
           ".mermaid"
         ],
-        "configuration": "./language-configuration.json",
-        "icon": {
-          "light": "./assets/mermaid-browser-file.svg",
-          "dark": "./assets/mermaid-browser-file.svg"
-        }
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -224,6 +220,5 @@
     "marked": "16.4.2",
     "mermaid": "11.16.1",
     "typescript": "^5.7.0"
-  },
-  "packageManager": "pnpm@10.15.1"
+  }
 }
