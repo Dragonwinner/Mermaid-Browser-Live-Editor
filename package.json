@@ -217,7 +217,7 @@
     "html2canvas": "1.4.1",
     "jspdf": "4.2.1",
     "katex": "0.18.4",
-    "marked": "16.4.2",
+    "marked": "18.0.9",
     "mermaid": "11.16.1",
     "typescript": "^5.7.0"
   }
