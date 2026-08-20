@@ -219,6 +219,6 @@
     "katex": "0.18.4",
     "marked": "16.4.2",
     "mermaid": "11.16.1",
-    "typescript": "^5.7.0"
+    "typescript": "^7.0.2"
   }
 }
